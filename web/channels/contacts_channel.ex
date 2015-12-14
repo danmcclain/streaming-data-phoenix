@@ -30,10 +30,9 @@ defmodule StreamingData.ContactsChannel do
   def handle_in("update", %{"data" => %{"id" => id, "attributes" => attributes, "type" => "contacts"}}, socket) do
     contact = Repo.get(Contact, id)
     |> Contact.changeset(normalize_attributes(attributes))
-    |> Repo.update!
+    |> StreamingData.StreamingRepo.update!([from: socket])
 
     payload = StreamingData.ContactSerializer.format(contact)
-    broadcast_from! socket, "update", payload
 
     {:reply, {:ok, payload}, socket}
   end
