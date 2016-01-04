@@ -16,7 +16,9 @@ defmodule StreamingData.StreamingRepo do
     end
     model = action_func.(model, options)
 
-    channel = "contacts:index"
+    module = model.__struct__
+
+    channel = module.channel_name <> ":" <> module.channel_scope(model)
 
     payload = StreamingData.ContactSerializer.format(model)
 

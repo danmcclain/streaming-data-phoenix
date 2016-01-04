@@ -1,4 +1,12 @@
 defmodule StreamingData.Contact do
+  def channel_name do
+    __schema__(:source)
+  end
+
+  def channel_scope(_model) do
+    "index"
+  end
+
   use StreamingData.Web, :model
 
   schema "contacts" do
