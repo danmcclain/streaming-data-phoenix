@@ -9,6 +9,7 @@ defmodule StreamingData do
     children = [
       # Start the endpoint when the application starts
       supervisor(StreamingData.Endpoint, []),
+      supervisor(EmberChannel.BroadcastQueue.Supervisor, []),
       # Start the Ecto repository
       worker(StreamingData.Repo, []),
       # Here you could define other workers and supervisors as children
