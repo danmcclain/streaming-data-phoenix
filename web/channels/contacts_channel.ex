@@ -38,9 +38,13 @@ defmodule StreamingData.ContactsChannel do
   end
 
   def handle_in("create", %{"data" => %{"attributes" => attributes, "type" => "contacts"}}, socket) do
-    contact = %Contact{}
-    |> Contact.changeset(normalize_attributes(attributes))
-    |> StreamingData.StreamingRepo.insert!([from: socket])
+    {:ok, contact} = StreamingData.StreamingRepo.transaction fn ->
+      %Contact{}
+      |> Contact.changeset(normalize_attributes(attributes))
+      |> StreamingData.StreamingRepo.insert!([from: socket])
+
+      StreamingData.StreamingRepo.insert!(nil)
+    end
 
     payload = StreamingData.ContactSerializer.format(contact)
 

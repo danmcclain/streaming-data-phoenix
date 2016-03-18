@@ -7,7 +7,7 @@ defmodule EmberChannel.BroadcastQueue.Supervisor do
 
   def init(_) do
     children = [
-      worker(EmberChannel.BroadcastQueue.Server, [], restart: :temporary)
+      worker(EmberChannel.BroadcastQueue, [], restart: :temporary)
     ]
     supervise children, strategy: :simple_one_for_one
   end
