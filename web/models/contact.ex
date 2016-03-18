@@ -1,4 +1,5 @@
 defmodule StreamingData.Contact do
+  use EmberChannel.Model
   def channel_name do
     __schema__(:source)
   end
