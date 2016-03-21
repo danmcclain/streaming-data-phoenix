@@ -4,7 +4,6 @@ defmodule StreamingData.ContactsChannel do
   alias StreamingData.Repo
 
   def join("contacts:" <> _scoped_id, auth_msg, socket) do
-    IO.inspect _scoped_id
     {:ok, socket}
   end
 
@@ -38,28 +37,27 @@ defmodule StreamingData.ContactsChannel do
   end
 
   def handle_in("create", %{"data" => %{"attributes" => attributes, "type" => "contacts"}}, socket) do
-    {:ok, contact} = StreamingData.StreamingRepo.transaction fn ->
-      %Contact{}
-      |> Contact.changeset(normalize_attributes(attributes))
-      |> StreamingData.StreamingRepo.insert!()
-    end, [from: socket]
+    # {:ok, contact} = StreamingData.StreamingRepo.transaction fn ->
+    #   %Contact{}
+    #   |> Contact.changeset(normalize_attributes(attributes))
+    #   |> StreamingData.StreamingRepo.insert!()
+    # end, [from: socket]
 
-    payload = StreamingData.ContactSerializer.format(contact)
-    {:reply, {:ok, payload}, socket}
+    # payload = StreamingData.ContactSerializer.format(contact)
+    # {:reply, {:ok, payload}, socket}
 
-    # %Contact{}
-    # |> Contact.changeset(normalize_attributes(attributes))
-    # |> StreamingData.StreamingRepo.insert([from: socket])
-    # |> case do
-      # {:ok, contact} ->
-        # payload = StreamingData.ContactSerializer.format(contact)
+    %Contact{}
+    |> Contact.changeset(normalize_attributes(attributes))
+    |> StreamingData.StreamingRepo.insert([from: socket])
+    |> case do
+      {:ok, contact} ->
+        payload = StreamingData.ContactSerializer.format(contact)
+        {:reply, {:ok, payload}, socket}
+      {:error, changeset} ->
+        payload = JaSerializer.EctoErrorSerializer.format(changeset)
 
-        # {:reply, {:ok, payload}, socket}
-      # {:error, changeset} ->
-        # payload = StreamingData.ContactSerializer.format(changeset)
-
-        # {:reply, {:error, payload}, socket}
-    # end
+        {:reply, {:error, payload}, socket}
+    end
   end
 
   defp normalize_attributes(attributes) do
@@ -68,4 +66,3 @@ defmodule StreamingData.ContactsChannel do
     |> Enum.into(%{})
   end
 end
-

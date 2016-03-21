@@ -19,9 +19,7 @@ defmodule StreamingData.StreamingRepo do
   end
 
   def transaction(func, opts \\ []) do
-    opts = if from = Dict.get(opts, :from) do
-      Dict.delete(opts, :from)
-    end
+    {from, opts} = Keyword.pop(opts, :from)
 
     queue = if not @repo.in_transaction? do
       {:ok, pid} = EmberChannel.BroadcastQueue.spawn(@endpoint, [from: from])
@@ -45,9 +43,7 @@ defmodule StreamingData.StreamingRepo do
   end
 
   defp brodcast_action(action_func, model, options, event) do
-    if from = Dict.get(options, :from) do
-      Dict.delete(options, :from)
-    end
+    {from, opts} = Keyword.pop(opts, :from)
 
     result = action_func.(model, options)
 

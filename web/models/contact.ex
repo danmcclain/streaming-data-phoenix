@@ -18,8 +18,8 @@ defmodule StreamingData.Contact do
     timestamps
   end
 
-  @required_fields ~w(first_name)
-  @optional_fields ~w(last_name title)
+  @required_fields ~w(first_name title)
+  @optional_fields ~w(last_name)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
