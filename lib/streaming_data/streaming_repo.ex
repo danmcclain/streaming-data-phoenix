@@ -42,7 +42,7 @@ defmodule StreamingData.StreamingRepo do
     result
   end
 
-  defp brodcast_action(action_func, model, options, event) do
+  defp brodcast_action(action_func, model, opt, event) do
     {from, opts} = Keyword.pop(opts, :from)
 
     result = action_func.(model, options)
