@@ -3,7 +3,7 @@ defmodule StreamingData.StreamingRepo do
   @endpoint StreamingData.Endpoint
 
   def insert!(model, options \\ []) do
-    brodcast_action!(&@repo.insert!/2, model, options, "new")
+    brodcast_action(&@repo.insert!/2, model, options, "new")
   end
 
   def insert(model, options \\ []) do
@@ -11,11 +11,11 @@ defmodule StreamingData.StreamingRepo do
   end
 
   def update!(model, options \\ []) do
-    brodcast_action!(&@repo.update!/2, model, options, "update")
+    brodcast_action(&@repo.update!/2, model, options, "update")
   end
 
   def update(model, options \\ []) do
-    brodcast_action(&@repo.update/2, model, options, "new")
+    brodcast_action(&@repo.update/2, model, options, "update")
   end
 
   def transaction(func, opts \\ []) do
@@ -40,19 +40,59 @@ defmodule StreamingData.StreamingRepo do
     result
   end
 
-  defp brodcast_action!(action_func, model, options, event) do
-    queue = Process.get(:ember_channel_queue)
+  # defp brodcast_action!(action_func, model, options, event) do
+    # queue = Process.get(:ember_channel_queue)
+    # if from = Dict.get(options, :from) do
+      # Dict.delete(options, :from)
+    # end
+    # model = action_func.(model, options)
+
+    # module = model.__struct__
+
+    # topic = module.channel_name <> ":" <> module.channel_scope(model)
+
+    # payload = StreamingData.ContactSerializer.format(model)
+
+    # if queue do
+      # EmberChannel.BroadcastQueue.push(queue, topic, event, payload)
+    # else
+      # if from do
+        # %{channel_pid: channel_pid} = from
+        # @endpoint.broadcast_from channel_pid, topic, event, payload
+      # else
+        # @endpoint.broadcast topic, event, payload
+      # end
+    # end
+
+    # model
+  # end
+
+  defp brodcast_action(action_func, model, options, event) do
     if from = Dict.get(options, :from) do
       Dict.delete(options, :from)
     end
-    model = action_func.(model, options)
+
+    result = action_func.(model, options)
+
+    case result do
+      {:ok, res_model} ->
+        broadcast(res_model, event, from)
+      {:error, changeset} ->
+        IO.puts "Error"
+      res_model ->
+        broadcast(res_model, event, from)
+    end
+
+    result
+  end
+
+  defp broadcast(model, event, from) do
+    queue = Process.get(:ember_channel_queue)
 
     module = model.__struct__
-
     topic = module.channel_name <> ":" <> module.channel_scope(model)
 
     payload = StreamingData.ContactSerializer.format(model)
-
     if queue do
       EmberChannel.BroadcastQueue.push(queue, topic, event, payload)
     else
@@ -63,32 +103,5 @@ defmodule StreamingData.StreamingRepo do
         @endpoint.broadcast topic, event, payload
       end
     end
-
-    model
-  end
-
-  defp brodcast_action(action_func, model, options, event) do
-    if from = Dict.get(options, :from) do
-      Dict.delete(options, :from)
-    end
-    result = action_func.(model, options)
-
-    module = model.__struct__
-
-    channel = module.channel_name <> ":" <> module.channel_scope(model)
-
-    payload = StreamingData.ContactSerializer.format(model)
-
-    case result do
-      {:ok, model} ->
-        if from do
-          %{channel_pid: channel_pid} = from
-          @endpoint.broadcast_from channel_pid, channel, event, payload
-        else
-          @endpoint.broadcast channel, event, payload
-        end
-    end
-
-    result
   end
 end

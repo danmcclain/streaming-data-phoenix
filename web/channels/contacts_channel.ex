@@ -42,8 +42,6 @@ defmodule StreamingData.ContactsChannel do
       %Contact{}
       |> Contact.changeset(normalize_attributes(attributes))
       |> StreamingData.StreamingRepo.insert!([from: socket])
-
-      StreamingData.StreamingRepo.insert!(nil)
     end
 
       %Contact{}
