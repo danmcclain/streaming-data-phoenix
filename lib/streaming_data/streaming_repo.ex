@@ -44,33 +44,6 @@ defmodule StreamingData.StreamingRepo do
     result
   end
 
-  # defp brodcast_action!(action_func, model, options, event) do
-    # queue = Process.get(:ember_channel_queue)
-    # if from = Dict.get(options, :from) do
-      # Dict.delete(options, :from)
-    # end
-    # model = action_func.(model, options)
-
-    # module = model.__struct__
-
-    # topic = module.channel_name <> ":" <> module.channel_scope(model)
-
-    # payload = StreamingData.ContactSerializer.format(model)
-
-    # if queue do
-      # EmberChannel.BroadcastQueue.push(queue, topic, event, payload)
-    # else
-      # if from do
-        # %{channel_pid: channel_pid} = from
-        # @endpoint.broadcast_from channel_pid, topic, event, payload
-      # else
-        # @endpoint.broadcast topic, event, payload
-      # end
-    # end
-
-    # model
-  # end
-
   defp brodcast_action(action_func, model, options, event) do
     if from = Dict.get(options, :from) do
       Dict.delete(options, :from)
