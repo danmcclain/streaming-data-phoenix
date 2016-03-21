@@ -19,8 +19,12 @@ defmodule StreamingData.StreamingRepo do
   end
 
   def transaction(func, opts \\ []) do
+    opts = if from = Dict.get(opts, :from) do
+      Dict.delete(opts, :from)
+    end
+
     queue = if not @repo.in_transaction? do
-      {:ok, pid} = EmberChannel.BroadcastQueue.spawn(@endpoint, opts)
+      {:ok, pid} = EmberChannel.BroadcastQueue.spawn(@endpoint, [from: from])
       Process.put(:ember_channel_queue, pid)
       pid
     end

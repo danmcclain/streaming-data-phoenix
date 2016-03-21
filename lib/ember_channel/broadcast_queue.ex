@@ -26,25 +26,28 @@ defmodule EmberChannel.BroadcastQueue do
     GenServer.start_link(__MODULE__, [endpoint, opts])
   end
 
-  def init([endpoint, _opts]) do 
-    IO.puts "RUNNING"
-    {:ok, %{endpoint: endpoint, queue: []}}
+  def init([endpoint, opts]) do 
+    {:ok, %{endpoint: endpoint, options: opts, queue: []}}
   end
 
   def handle_call({:push, topic, event, payload}, _from, %{queue: queue} = state) do
     {:reply, :ok, %{state | queue: [{topic, event, payload} | queue]}}
   end
 
-  def handle_call(:flush, _from, %{endpoint: endpoint, queue: queue} = state) do
-    # ... broadcast
-    broadcast_queue(queue, endpoint)
+  def handle_call(:flush, _from, %{endpoint: endpoint, queue: queue, options: options} = state) do
+    broadcast_queue(queue, endpoint, options)
     {:stop, :normal, :ok, state}
   end
 
-  defp broadcast_queue([], endpoint), do: nil
+  defp broadcast_queue([], endpoint, options), do: nil
 
-  defp broadcast_queue([{topic, event, payload} | rest], endpoint) do
-    broadcast_queue(rest, endpoint)
-    endpoint.broadcast topic, event, payload
+  defp broadcast_queue([{topic, event, payload} | rest], endpoint, options) do
+    broadcast_queue(rest, endpoint, options)
+
+    if %{channel_pid: channel_pid} = Dict.get(options, :from) do
+      endpoint.broadcast_from channel_pid, topic, event, payload
+    else
+      endpoint.broadcast topic, event, payload
+    end
   end
 end

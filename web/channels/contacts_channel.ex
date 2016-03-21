@@ -41,24 +41,25 @@ defmodule StreamingData.ContactsChannel do
     {:ok, contact} = StreamingData.StreamingRepo.transaction fn ->
       %Contact{}
       |> Contact.changeset(normalize_attributes(attributes))
-      |> StreamingData.StreamingRepo.insert!([from: socket])
-    end
+      |> StreamingData.StreamingRepo.insert!()
+    end, [from: socket]
 
-      %Contact{}
-      |> Contact.changeset(normalize_attributes(attributes))
-      |> StreamingData.StreamingRepo.insert([from: socket])
-      |> case do
-        {:ok, contact} ->
-          payload = StreamingData.ContactSerializer.format(contact)
+    payload = StreamingData.ContactSerializer.format(contact)
+    {:reply, {:ok, payload}, socket}
 
-          {:reply, {:ok, payload}, socket}
-        {:error, changeset} ->
-          payload = StreamingData.ContactSerializer.format(changeset)
+    # %Contact{}
+    # |> Contact.changeset(normalize_attributes(attributes))
+    # |> StreamingData.StreamingRepo.insert([from: socket])
+    # |> case do
+      # {:ok, contact} ->
+        # payload = StreamingData.ContactSerializer.format(contact)
 
-          {:reply, {:error, payload}, socket}
-      end
+        # {:reply, {:ok, payload}, socket}
+      # {:error, changeset} ->
+        # payload = StreamingData.ContactSerializer.format(changeset)
 
-
+        # {:reply, {:error, payload}, socket}
+    # end
   end
 
   defp normalize_attributes(attributes) do
