@@ -26,7 +26,7 @@ defmodule EmberChannel.BroadcastQueue do
     GenServer.start_link(__MODULE__, [endpoint, opts])
   end
 
-  def init([endpoint, opts]) do 
+  def init([endpoint, opts]) do
     {:ok, %{endpoint: endpoint, options: opts, queue: []}}
   end
 
@@ -36,7 +36,7 @@ defmodule EmberChannel.BroadcastQueue do
 
   def handle_call(:flush, _from, %{endpoint: endpoint, queue: queue, options: options} = state) do
     broadcast_queue(queue, endpoint, options)
-    {:stop, :normal, :ok, state}
+    {:reply, :ok, state}
   end
 
   defp broadcast_queue([], endpoint, options), do: nil
