@@ -2,12 +2,24 @@ defmodule StreamingData.StreamingRepo do
   @repo StreamingData.Repo
   @endpoint StreamingData.Endpoint
 
+  defdelegate [__adapter__, __log__(entry), config, start_link(opts), in_transaction?,
+               stop(pid, timeout), rollback(value), all(queryable, opts), get(queryable, id, opts),
+               get!(queryable, id, opts), get_by(queryable, clauses, opts),
+               get_by!(queryable, clauses, opts), one(queryable, opts), one!(queryable, opts),
+               insert_all(schema_or_source, entries, opts), update_all(queryable, updates, opts),
+               delete_all(queryable, opts), preload(struct_or_structs, preloads, opts),
+               aggregate(queryable, aggregate, field, opts)], to: @repo
+
+  def insert(model, options \\ []) do
+    brodcast_action(&@repo.insert/2, model, options, "new")
+  end
+
   def insert!(model, options \\ []) do
     brodcast_action(&@repo.insert!/2, model, options, "new")
   end
 
-  def insert(model, options \\ []) do
-    brodcast_action(&@repo.insert/2, model, options, "new")
+  def update(model, options \\ []) do
+    brodcast_action(&@repo.update/2, model, options, "update")
   end
 
   def update!(model, options \\ []) do
@@ -81,6 +93,9 @@ defmodule StreamingData.StreamingRepo do
         %{channel_pid: channel_pid} = from
         @endpoint.broadcast_from channel_pid, topic, event, payload
       else
+        require IEx
+        IEx.pry
+        IO.inspect @endpoint
         @endpoint.broadcast topic, event, payload
       end
     end
