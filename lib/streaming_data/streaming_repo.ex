@@ -14,8 +14,16 @@ defmodule StreamingData.StreamingRepo do
     brodcast_action(&@repo.update!/2, model, options, "update")
   end
 
-  def update(model, options \\ []) do
-    brodcast_action(&@repo.update/2, model, options, "update")
+  def delete(model, options \\ []) do
+    brodcast_action(&@repo.delete/2, model, options, "delete")
+  end
+
+  def delete!(model, options \\ []) do
+    brodcast_action(&@repo.delete!/2, model, options, "delete")
+  end
+
+  def insert_or_update(changeset, options \\ []) do
+    brodcast_action(&@repo.insert_or_update!/2, changeset, options, "new")
   end
 
   def transaction(func, opts \\ []) do
@@ -42,10 +50,10 @@ defmodule StreamingData.StreamingRepo do
     result
   end
 
-  defp brodcast_action(action_func, model, opt, event) do
+  defp brodcast_action(action_func, model, opts, event) do
     {from, opts} = Keyword.pop(opts, :from)
 
-    result = action_func.(model, options)
+    result = action_func.(model, opts)
 
     case result do
       {:ok, res_model} ->

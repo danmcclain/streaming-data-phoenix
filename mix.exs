@@ -30,10 +30,10 @@ defmodule StreamingData.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.1.4"},
-     {:phoenix_ecto, github: "phoenixframework/phoenix_ecto"},
-     {:phoenix_html, github: "phoenixframework/phoenix_html", override: true},
-     {:ecto, "2.0.0-beta.2", override: true},
+    [{:phoenix, "~> 1.2.0-rc.0"},
+     {:phoenix_ecto, "~> 3.0.0-rc.0"},
+     {:phoenix_html, "2.5.1"},
+     {:ecto, "2.0.0-rc.5", override: true},
      {:postgrex, ">= 0.0.0"},
      {:ja_serializer, "~> 0.3.1"},
      {:cowboy, "~> 1.0"}]
